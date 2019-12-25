@@ -18,6 +18,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Slides", "Slides", "{7CFF93
 		Documents\UnitTesting-workshop-models.pdf = Documents\UnitTesting-workshop-models.pdf
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{63D04526-0144-479C-8F83-902D63D0BAC1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rwt.Core.Services.UTest", "Rwt.Core.Services.UTest\Rwt.Core.Services.UTest.csproj", "{5E01E974-5CB0-4B7A-A900-BECA46778F61}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,12 +44,17 @@ Global
 		{C26889CD-3573-4405-BA48-F803F217016A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C26889CD-3573-4405-BA48-F803F217016A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C26889CD-3573-4405-BA48-F803F217016A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E01E974-5CB0-4B7A-A900-BECA46778F61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E01E974-5CB0-4B7A-A900-BECA46778F61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E01E974-5CB0-4B7A-A900-BECA46778F61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E01E974-5CB0-4B7A-A900-BECA46778F61}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{7CFF93CC-FE41-4E91-B56D-8F5D27383D17} = {58B8FEC2-96F5-44BC-89D9-8EB8C56AA2AA}
+		{5E01E974-5CB0-4B7A-A900-BECA46778F61} = {63D04526-0144-479C-8F83-902D63D0BAC1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1F67A6F9-16CA-435F-AF87-224EF69787FC}

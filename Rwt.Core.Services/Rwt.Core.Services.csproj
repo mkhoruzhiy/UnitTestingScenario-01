@@ -49,6 +49,7 @@
     <Compile Include="MessageQueueService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegistryHttpFacade.cs" />
+    <Compile Include="ValueObjects\Constants.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rwt.Core.Abstractions\Rwt.Core.Abstractions.csproj">

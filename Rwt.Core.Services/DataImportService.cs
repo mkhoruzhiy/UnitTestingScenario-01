@@ -2,6 +2,7 @@
 using Rwt.Abstractions.Models;
 using Rwt.Abstractions.Services;
 using Rwt.Core.Services.Mappers;
+using Rwt.Core.Services.ValueObjects;
 using Rwt.Persistence.Abstractions;
 using Rwt.Persistence.ValueObjects;
 using System;
@@ -13,7 +14,7 @@ namespace Rwt.Core.Services
         private readonly IRegistryHttpFacade _facade;
         private readonly IPersonRepository _repo;
         private readonly IMessageQueueService _messageQueue;
-        private const string MSQ_QUEUE_NAME = "PersonUpdate";
+        private const string MSQ_QUEUE_NAME = Constants.PersonUpdateQueueName;
 
         public DataImportService(IRegistryHttpFacade facade, IPersonRepository repository, IMessageQueueService messageQueue)
         {
