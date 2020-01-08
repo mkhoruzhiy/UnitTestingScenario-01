@@ -1,6 +1,7 @@
 ﻿using Rwt.Abstractions.Facades;
 using Rwt.Abstractions.Models;
 using Rwt.Abstractions.Services;
+using Rwt.Core.Services.Exceptions;
 using Rwt.Core.Services.Mappers;
 using Rwt.Core.Services.ValueObjects;
 using Rwt.Persistence.Abstractions;
@@ -14,7 +15,7 @@ namespace Rwt.Core.Services
         private readonly IRegistryHttpFacade _facade;
         private readonly IPersonRepository _repo;
         private readonly IMessageQueueService _messageQueue;
-        private const string MSQ_QUEUE_NAME = Constants.PersonUpdateQueueName;
+        private const string MSQ_QUEUE_NAME = RwtConstants.PersonUpdateQueueName;
 
         public DataImportService(IRegistryHttpFacade facade, IPersonRepository repository, IMessageQueueService messageQueue)
         {
@@ -40,7 +41,7 @@ namespace Rwt.Core.Services
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                throw;
+                throw new ImportException(ex.Message, ex);
             }
         }
     }
