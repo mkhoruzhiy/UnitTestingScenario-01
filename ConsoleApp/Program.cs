@@ -50,7 +50,8 @@ namespace ConsoleApp
                 }
             }
 
-            Thread.Sleep(2000);
+            Console.WriteLine("Process complete.");
+            Console.ReadKey();
         }
     }
 }

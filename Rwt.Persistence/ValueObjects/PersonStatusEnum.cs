@@ -4,6 +4,6 @@
     {
         New,
         Updated,
-        PopulatedForChanges
+        Published
     }
 }
