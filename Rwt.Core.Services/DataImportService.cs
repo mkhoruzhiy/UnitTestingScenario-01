@@ -26,13 +26,20 @@ namespace Rwt.Core.Services
         {
             try
             {
+                // getting person data from external data source
                 var model = _facade.GetPerson(personId);
-                var entity = model.ToEntity();
+
+                // mapping received data to DB entity
+                var entity = model.ToEntity(PersonStatusEnum.New);
+
+                // persisting person data in database
                 var id = _repo.UpdateOrCreate(entity);
 
+                // sending a Queue service message that a given person imported/updated
                 var msqId = _messageQueue.Put(MSQ_QUEUE_NAME, new PersonUpdateMessage { PersonId = id });
 
-                _repo.SetPersonStatus(id, PersonStatusEnum.PopulatedForChanges);
+                // updating status of the imported person in the local DB
+                _repo.SetPersonStatus(id, PersonStatusEnum.Published);
 
                 return id;
             }
