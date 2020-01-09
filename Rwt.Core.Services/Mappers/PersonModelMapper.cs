@@ -1,6 +1,6 @@
 ﻿using Rwt.Abstractions.Models;
+using Rwt.Abstractions.ValueObjects;
 using Rwt.Persistence.Entities;
-using Rwt.Persistence.ValueObjects;
 
 namespace Rwt.Core.Services.Mappers
 {

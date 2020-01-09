@@ -1,4 +1,4 @@
-﻿namespace Rwt.Persistence.ValueObjects
+﻿namespace Rwt.Abstractions.ValueObjects
 {
     public enum PersonStatusEnum
     {

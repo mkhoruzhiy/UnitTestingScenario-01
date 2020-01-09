@@ -1,5 +1,5 @@
-﻿using Rwt.Persistence.Entities;
-using Rwt.Persistence.ValueObjects;
+﻿using Rwt.Abstractions.ValueObjects;
+using Rwt.Persistence.Entities;
 using System;
 
 

@@ -4,11 +4,11 @@ using Moq;
 using Rwt.Abstractions.Facades;
 using Rwt.Abstractions.Models;
 using Rwt.Abstractions.Services;
+using Rwt.Abstractions.ValueObjects;
 using Rwt.Core.Services.Exceptions;
 using Rwt.Core.Services.ValueObjects;
 using Rwt.Persistence.Abstractions;
 using Rwt.Persistence.Entities;
-using Rwt.Persistence.ValueObjects;
 using System;
 
 namespace Rwt.Core.Services.Tests
@@ -61,28 +61,57 @@ namespace Rwt.Core.Services.Tests
                 .Verify(s => s.UpdateOrCreate(It.Is<Person>(p => p.Ssn == personModel.Ssn && p.FirstName == personModel.FirstName && p.LastName == personModel.LastName)), Times.Once);
 
             this._messageQueueServiceMock
-                .Verify(s => s.Put(RwtConstants.PersonUpdateQueueName, It.Is<PersonUpdateMessage>(p => p.PersonId == personId)), Times.Once);
-
-            this._messageQueueServiceMock
-                .Verify(s => s.Put(It.IsAny<string>(), It.IsAny<PersonUpdateMessage>()), Times.Once);
+                .Verify(s => s.Put(RwtConstants.PersonUpdateQueueName, It.Is<PersonUpdateMessage>(p => p.PersonId == personId && p.Status == entityStatus)), Times.Once);
 
             this._personRepositoryMock
                 .Verify(s => s.SetPersonStatus(personId, PersonStatusEnum.Published), Times.Once);
         }
 
         [TestMethod]
+        public void ImportPerson_Ok_NoChanges()
+        {
+            // arrange
+            var entityStatus = PersonStatusEnum.Identical;
+            var personModel = _fixture.Create<PersonModel>();
+            var personId = _fixture.Create<Guid>();
+
+            this._registryHttpFacadeMock
+                .Setup(s => s.GetPerson(personModel.Ssn))
+                .Returns(personModel);
+
+            this._personRepositoryMock
+                .Setup(s => s.UpdateOrCreate(It.Is<Person>(p => p.Ssn == personModel.Ssn && p.FirstName == personModel.FirstName && p.LastName == personModel.LastName)))
+                .Callback<Person>(p => { p.Id = personId; p.Status = entityStatus; });
+
+            // act
+            var result = _sut.ImportPerson(personModel.Ssn);
+            
+            // assert
+            Assert.AreEqual(result, personId);
+
+            this._personRepositoryMock
+                .Verify(s => s.UpdateOrCreate(It.Is<Person>(p => p.Ssn == personModel.Ssn && p.FirstName == personModel.FirstName && p.LastName == personModel.LastName)), Times.Once);
+
+            this._messageQueueServiceMock
+                .Verify(s => s.Put(RwtConstants.PersonUpdateQueueName, It.IsAny<PersonUpdateMessage>()), Times.Never);
+
+            this._personRepositoryMock
+                .Verify(s => s.SetPersonStatus(personId, PersonStatusEnum.Published), Times.Never);
+        }
+
+        [TestMethod]
         public void ImportPerson_GetPerson_ThrowsException()
         {
             // arrange
-            var personModel = _fixture.Create<PersonModel>();
+            var ssn = _fixture.Create<string>();
             var errMessage = _fixture.Create<string>();
 
-            this._registryHttpFacadeMock.Setup(s => s.GetPerson(personModel.Ssn))
+            this._registryHttpFacadeMock.Setup(s => s.GetPerson(ssn))
                 .Throws(new Exception(errMessage));
 
             // act
             var exception = Assert.ThrowsException<ImportException>(
-                () => _sut.ImportPerson(personModel.Ssn));
+                () => _sut.ImportPerson(ssn));
             
             // assert
             Assert.AreEqual(exception.Message, errMessage);
@@ -119,6 +148,9 @@ namespace Rwt.Core.Services.Tests
             // assert
             Assert.AreEqual(exception.Message, errMessage);
 
+            this._registryHttpFacadeMock
+                .Verify(s => s.GetPerson(personModel.Ssn), Times.Once);
+
             this._personRepositoryMock
                 .Verify(s => s.UpdateOrCreate(It.IsAny<Person>()), Times.Once);
 
@@ -130,7 +162,9 @@ namespace Rwt.Core.Services.Tests
         }
 
         [TestMethod]
-        public void ImportPerson_MessageSent_UpdatingStatusThrowsException()
+        [DataRow(PersonStatusEnum.New)]
+        [DataRow(PersonStatusEnum.Updated)]
+        public void ImportPerson_MessageSending_ThrowsException(PersonStatusEnum entityStatus)
         {
             // arrange
             var personModel = _fixture.Create<PersonModel>();
@@ -140,6 +174,10 @@ namespace Rwt.Core.Services.Tests
             this._registryHttpFacadeMock
                 .Setup(s => s.GetPerson(personModel.Ssn))
                 .Returns(personModel);
+
+            this._personRepositoryMock
+                .Setup(s => s.UpdateOrCreate(It.Is<Person>(p => p.Ssn == personModel.Ssn && p.FirstName == personModel.FirstName && p.LastName == personModel.LastName)))
+                .Callback<Person>(p => { p.Id = personId; p.Status = entityStatus; });
 
             this._messageQueueServiceMock
                 .Setup(s => s.Put(RwtConstants.PersonUpdateQueueName, It.Is<PersonUpdateMessage>(p => p.PersonId == personId)))
@@ -155,14 +193,16 @@ namespace Rwt.Core.Services.Tests
                 .Verify(s => s.UpdateOrCreate(It.IsAny<Person>()), Times.Once);
 
             this._messageQueueServiceMock
-                .Verify(s => s.Put(ValueObjects.RwtConstants.PersonUpdateQueueName, It.IsAny<PersonUpdateMessage>()), Times.Once);
+                .Verify(s => s.Put(RwtConstants.PersonUpdateQueueName, It.Is<PersonUpdateMessage>(p => p.PersonId == personId && p.Status == entityStatus)), Times.Once);
 
             this._personRepositoryMock
                 .Verify(s => s.SetPersonStatus(It.IsAny<Guid>(), It.IsAny<PersonStatusEnum>()), Times.Never);
         }
 
         [TestMethod]
-        public void ImportPerson_UpdatingPersonStatus_ThrowsException()
+        [DataRow(PersonStatusEnum.New)]
+        [DataRow(PersonStatusEnum.Updated)]
+        public void ImportPerson_UpdatingPersonStatus_ThrowsException(PersonStatusEnum entityStatus)
         {
             // arrange
             var personModel = _fixture.Create<PersonModel>();
@@ -172,6 +212,10 @@ namespace Rwt.Core.Services.Tests
             this._registryHttpFacadeMock
                 .Setup(s => s.GetPerson(personModel.Ssn))
                 .Returns(personModel);
+
+            this._personRepositoryMock
+                .Setup(s => s.UpdateOrCreate(It.Is<Person>(p => p.Ssn == personModel.Ssn && p.FirstName == personModel.FirstName && p.LastName == personModel.LastName)))
+                .Callback<Person>(p => { p.Id = personId; p.Status = entityStatus; });
 
             this._personRepositoryMock
                 .Setup(s => s.SetPersonStatus(personId, PersonStatusEnum.Published))
@@ -187,10 +231,7 @@ namespace Rwt.Core.Services.Tests
                 .Verify(s => s.UpdateOrCreate(It.IsAny<Person>()), Times.Once);
 
             this._messageQueueServiceMock
-                .Verify(s => s.Put(RwtConstants.PersonUpdateQueueName, It.IsAny<PersonUpdateMessage>()), Times.Once);
-
-            this._messageQueueServiceMock
-                .Verify(s => s.Put(It.IsAny<string>(), It.IsAny<PersonUpdateMessage>()), Times.Once);
+                .Verify(s => s.Put(RwtConstants.PersonUpdateQueueName, It.Is<PersonUpdateMessage>(p => p.PersonId == personId && p.Status == entityStatus)), Times.Once);
 
             this._personRepositoryMock
                 .Verify(s => s.SetPersonStatus(It.IsAny<Guid>(), It.IsAny<PersonStatusEnum>()), Times.Once);

@@ -1,11 +1,11 @@
 ﻿using Rwt.Abstractions.Facades;
 using Rwt.Abstractions.Models;
 using Rwt.Abstractions.Services;
+using Rwt.Abstractions.ValueObjects;
 using Rwt.Core.Services.Exceptions;
 using Rwt.Core.Services.Mappers;
 using Rwt.Core.Services.ValueObjects;
 using Rwt.Persistence.Abstractions;
-using Rwt.Persistence.ValueObjects;
 using System;
 using System.Linq;
 
@@ -41,7 +41,7 @@ namespace Rwt.Core.Services
                 if (new[] { PersonStatusEnum.New, PersonStatusEnum.Updated }.Contains(entity.Status))
                 {
                     // sending a Queue service message that a given person imported/updated
-                    var msqId = _messageQueue.Put(MSQ_QUEUE_NAME, new PersonUpdateMessage { PersonId = entity.Id });
+                    var msqId = _messageQueue.Put(MSQ_QUEUE_NAME, new PersonUpdateMessage { PersonId = entity.Id, Status = entity.Status });
 
                     // updating status of the imported person in the local DB
                     _repo.SetPersonStatus(entity.Id, PersonStatusEnum.Published);
