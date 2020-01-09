@@ -35,7 +35,9 @@ namespace Rwt.Core.Services.Tests
         }
 
         [TestMethod]
-        public void ImportPerson_Ok_ReturnsPersonId()
+        [DataRow(PersonStatusEnum.New)]
+        [DataRow(PersonStatusEnum.Updated)]
+        public void ImportPerson_Ok_ChangesPublished(PersonStatusEnum entityStatus)
         {
             // arrange
             var personModel = _fixture.Create<PersonModel>();
@@ -47,13 +49,16 @@ namespace Rwt.Core.Services.Tests
 
             this._personRepositoryMock
                 .Setup(s => s.UpdateOrCreate(It.Is<Person>(p => p.Ssn == personModel.Ssn && p.FirstName == personModel.FirstName && p.LastName == personModel.LastName)))
-                .Returns(personId);
+                .Callback<Person>(p => { p.Id = personId; p.Status = entityStatus; });
 
             // act
             var result = _sut.ImportPerson(personModel.Ssn);
             
             // assert
             Assert.AreEqual(result, personId);
+
+            this._personRepositoryMock
+                .Verify(s => s.UpdateOrCreate(It.Is<Person>(p => p.Ssn == personModel.Ssn && p.FirstName == personModel.FirstName && p.LastName == personModel.LastName)), Times.Once);
 
             this._messageQueueServiceMock
                 .Verify(s => s.Put(RwtConstants.PersonUpdateQueueName, It.Is<PersonUpdateMessage>(p => p.PersonId == personId)), Times.Once);
@@ -62,7 +67,7 @@ namespace Rwt.Core.Services.Tests
                 .Verify(s => s.Put(It.IsAny<string>(), It.IsAny<PersonUpdateMessage>()), Times.Once);
 
             this._personRepositoryMock
-                .Verify(s => s.SetPersonStatus(personId, PersonStatusEnum.PopulatedForChanges), Times.Once);
+                .Verify(s => s.SetPersonStatus(personId, PersonStatusEnum.Published), Times.Once);
         }
 
         [TestMethod]
@@ -125,7 +130,7 @@ namespace Rwt.Core.Services.Tests
         }
 
         [TestMethod]
-        public void ImportPerson_MessagePut_ThrowsException()
+        public void ImportPerson_MessageSent_UpdatingStatusThrowsException()
         {
             // arrange
             var personModel = _fixture.Create<PersonModel>();
@@ -135,10 +140,6 @@ namespace Rwt.Core.Services.Tests
             this._registryHttpFacadeMock
                 .Setup(s => s.GetPerson(personModel.Ssn))
                 .Returns(personModel);
-
-            this._personRepositoryMock
-                .Setup(s => s.UpdateOrCreate(It.Is<Person>(p => p.Ssn == personModel.Ssn)))
-                .Returns(personId);
 
             this._messageQueueServiceMock
                 .Setup(s => s.Put(RwtConstants.PersonUpdateQueueName, It.Is<PersonUpdateMessage>(p => p.PersonId == personId)))
@@ -161,7 +162,7 @@ namespace Rwt.Core.Services.Tests
         }
 
         [TestMethod]
-        public void ImportPerson_SetPersonStatus_ThrowsException()
+        public void ImportPerson_UpdatingPersonStatus_ThrowsException()
         {
             // arrange
             var personModel = _fixture.Create<PersonModel>();
@@ -173,11 +174,7 @@ namespace Rwt.Core.Services.Tests
                 .Returns(personModel);
 
             this._personRepositoryMock
-                .Setup(s => s.UpdateOrCreate(It.Is<Person>(p => p.Ssn == personModel.Ssn)))
-                .Returns(personId);
-
-            this._personRepositoryMock
-                .Setup(s => s.SetPersonStatus(personId, PersonStatusEnum.PopulatedForChanges))
+                .Setup(s => s.SetPersonStatus(personId, PersonStatusEnum.Published))
                 .Throws(new Exception(errMessage));
 
             // act
