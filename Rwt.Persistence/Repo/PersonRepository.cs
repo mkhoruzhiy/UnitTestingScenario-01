@@ -11,11 +11,10 @@ namespace Rwt.Persistence.Repo
         {
         }
 
-        public Guid UpdateOrCreate(Person person)
+        public void UpdateOrCreate(Person person)
         {
             person.Id = Guid.NewGuid();
             person.Status = PersonStatusEnum.Updated;
-            return person.Id;
         }
     }
 }
