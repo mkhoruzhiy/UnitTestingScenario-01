@@ -1,6 +1,6 @@
-﻿using Rwt.Persistence.Abstractions;
+﻿using Rwt.Abstractions.ValueObjects;
+using Rwt.Persistence.Abstractions;
 using Rwt.Persistence.Entities;
-using Rwt.Persistence.ValueObjects;
 using System;
 
 namespace Rwt.Persistence.Repo

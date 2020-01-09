@@ -1,4 +1,4 @@
-﻿using Rwt.Persistence.ValueObjects;
+﻿using Rwt.Abstractions.ValueObjects;
 using System;
 
 namespace Rwt.Persistence.Entities
