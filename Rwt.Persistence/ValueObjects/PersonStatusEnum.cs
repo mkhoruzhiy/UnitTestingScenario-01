@@ -4,6 +4,7 @@
     {
         New,
         Updated,
+        Identical,
         Published
     }
 }

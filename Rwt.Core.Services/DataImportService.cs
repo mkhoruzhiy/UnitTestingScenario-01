@@ -5,6 +5,7 @@ using Rwt.Core.Services.Mappers;
 using Rwt.Persistence.Abstractions;
 using Rwt.Persistence.ValueObjects;
 using System;
+using System.Linq;
 
 namespace Rwt.Core.Services
 {
@@ -33,15 +34,18 @@ namespace Rwt.Core.Services
                 var entity = model.ToEntity(PersonStatusEnum.New);
 
                 // persisting person data in database
-                var id = _repo.UpdateOrCreate(entity);
+                _repo.UpdateOrCreate(entity);
 
-                // sending a Queue service message that a given person imported/updated
-                var msqId = _messageQueue.Put(MSQ_QUEUE_NAME, new PersonUpdateMessage { PersonId = id });
+                if (new[] { PersonStatusEnum.New, PersonStatusEnum.Updated }.Contains(entity.Status))
+                {
+                    // sending a Queue service message that a given person imported/updated
+                    var msqId = _messageQueue.Put(MSQ_QUEUE_NAME, new PersonUpdateMessage { PersonId = entity.Id });
 
-                // updating status of the imported person in the local DB
-                _repo.SetPersonStatus(id, PersonStatusEnum.Published);
+                    // updating status of the imported person in the local DB
+                    _repo.SetPersonStatus(entity.Id, PersonStatusEnum.Published);
+                }
 
-                return id;
+                return entity.Id;
             }
             catch (Exception ex)
             {
