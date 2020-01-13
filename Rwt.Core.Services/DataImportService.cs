@@ -2,6 +2,7 @@
 using Rwt.Abstractions.Models;
 using Rwt.Abstractions.Services;
 using Rwt.Abstractions.ValueObjects;
+using Rwt.Core.Services.Exceptions;
 using Rwt.Core.Services.Mappers;
 using Rwt.Core.Services.ValueObjects;
 using Rwt.Persistence.Abstractions;
@@ -50,8 +51,7 @@ namespace Rwt.Core.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                throw;
+                throw new ImportException(ex.Message);
             }
         }
     }

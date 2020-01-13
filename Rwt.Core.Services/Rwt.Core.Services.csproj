@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataImportService.cs" />
+    <Compile Include="Exceptions\ImportException.cs" />
     <Compile Include="Mappers\PersonModelMapper.cs" />
     <Compile Include="MessageQueueService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
